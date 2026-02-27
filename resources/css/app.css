@@ -29,6 +29,8 @@
 }
 
 #modal-crear:target,
-#modal-crear.open {
+#modal-crear.open,
+[id^="modal-editar"]:target,
+[id^="modal-editar"].open {
     display: flex;
 }

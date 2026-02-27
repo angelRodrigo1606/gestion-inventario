@@ -71,7 +71,7 @@
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-3 justify-end">
-                                <a href="{{ route('productos.edit', $producto) }}"
+                                <a href="#modal-editar-{{ $producto->id }}"
                                    class="text-system-blue hover:underline text-xs font-medium">
                                     Editar
                                 </a>
@@ -108,7 +108,7 @@
     {{-- Modal: Nuevo producto --}}
     <div id="modal-crear"
          class="fixed inset-0 hidden items-center justify-center z-50
-                {{ $errors->any() ? 'open' : '' }}">
+                {{ $errors->any() && !old('_editing_id') ? 'open' : '' }}">
 
         {{-- Backdrop --}}
         <a href="#" class="fixed inset-0 bg-black/60"></a>
@@ -243,4 +243,159 @@
             </form>
         </div>
     </div>
+
+    {{-- Modales: Editar producto (uno por producto) --}}
+    @foreach ($productos as $producto)
+        <div id="modal-editar-{{ $producto->id }}"
+             class="fixed inset-0 hidden items-center justify-center z-50
+                    {{ old('_editing_id') == $producto->id && $errors->any() ? 'open' : '' }}">
+
+            {{-- Backdrop --}}
+            <a href="#" class="fixed inset-0 bg-black/60"></a>
+
+            {{-- Contenido --}}
+            <div class="relative bg-secondary-system-background rounded-2xl p-8 max-w-2xl w-full mx-4 overflow-y-auto max-h-[90vh]">
+
+                {{-- Cabecera --}}
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-label">Editar producto</h2>
+                    <a href="#" class="text-secondary-label hover:text-label text-2xl leading-none transition">&times;</a>
+                </div>
+
+                <div class="h-px bg-separator mb-6"></div>
+
+                {{-- Formulario --}}
+                <form method="POST" action="{{ route('productos.update', $producto) }}" novalidate>
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="_editing_id" value="{{ $producto->id }}">
+
+                    <div class="grid grid-cols-2 gap-4">
+                        {{-- Código --}}
+                        <div>
+                            @include('productos._field', [
+                                'name'  => 'codigo',
+                                'label' => 'Código (opcional)',
+                                'type'  => 'text',
+                                'value' => old('_editing_id') == $producto->id ? old('codigo') : $producto->codigo,
+                            ])
+                        </div>
+
+                        {{-- Unidad --}}
+                        <div>
+                            <label for="unidad-{{ $producto->id }}" class="block text-sm font-medium text-secondary-label mb-1">Unidad</label>
+                            <select id="unidad-{{ $producto->id }}" name="unidad"
+                                class="w-full bg-system-background border rounded-lg px-3 py-2 text-sm text-label focus:outline-none focus:ring-2 focus:ring-system-blue
+                                    {{ old('_editing_id') == $producto->id && $errors->has('unidad') ? 'border-system-red' : 'border-separator' }}">
+                                @php
+                                    $selectedUnidad = old('_editing_id') == $producto->id ? old('unidad', $producto->unidad) : $producto->unidad;
+                                @endphp
+                                @foreach (['unidad', 'kg', 'g', 'litro', 'ml', 'caja', 'paquete', 'par'] as $u)
+                                    <option value="{{ $u }}" {{ $selectedUnidad === $u ? 'selected' : '' }}>
+                                        {{ ucfirst($u) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @if (old('_editing_id') == $producto->id)
+                                @error('unidad') <p class="text-system-red text-xs mt-1">{{ $message }}</p> @enderror
+                            @endif
+                        </div>
+
+                        {{-- Nombre --}}
+                        <div class="col-span-2">
+                            @include('productos._field', [
+                                'name'  => 'nombre',
+                                'label' => 'Nombre',
+                                'type'  => 'text',
+                                'value' => old('_editing_id') == $producto->id ? old('nombre') : $producto->nombre,
+                            ])
+                        </div>
+
+                        {{-- Descripción --}}
+                        <div class="col-span-2">
+                            <label for="descripcion-{{ $producto->id }}" class="block text-sm font-medium text-secondary-label mb-1">
+                                Descripción (opcional)
+                            </label>
+                            <textarea id="descripcion-{{ $producto->id }}" name="descripcion" rows="3"
+                                class="w-full bg-system-background border rounded-lg px-3 py-2 text-sm text-label focus:outline-none focus:ring-2 focus:ring-system-blue
+                                    {{ old('_editing_id') == $producto->id && $errors->has('descripcion') ? 'border-system-red' : 'border-separator' }}">{{ old('_editing_id') == $producto->id ? old('descripcion') : $producto->descripcion }}</textarea>
+                            @if (old('_editing_id') == $producto->id)
+                                @error('descripcion') <p class="text-system-red text-xs mt-1">{{ $message }}</p> @enderror
+                            @endif
+                        </div>
+
+                        {{-- Precio compra --}}
+                        <div>
+                            @include('productos._field', [
+                                'name'  => 'precio_compra',
+                                'label' => 'Precio de compra',
+                                'type'  => 'number',
+                                'value' => old('_editing_id') == $producto->id ? old('precio_compra') : $producto->precio_compra,
+                                'attrs' => 'min="0" step="0.01"',
+                            ])
+                        </div>
+
+                        {{-- Precio venta --}}
+                        <div>
+                            @include('productos._field', [
+                                'name'  => 'precio_venta',
+                                'label' => 'Precio de venta',
+                                'type'  => 'number',
+                                'value' => old('_editing_id') == $producto->id ? old('precio_venta') : $producto->precio_venta,
+                                'attrs' => 'min="0" step="0.01"',
+                            ])
+                        </div>
+
+                        {{-- Stock --}}
+                        <div>
+                            @include('productos._field', [
+                                'name'  => 'stock',
+                                'label' => 'Stock',
+                                'type'  => 'number',
+                                'value' => old('_editing_id') == $producto->id ? old('stock') : $producto->stock,
+                                'attrs' => 'min="0" step="1"',
+                            ])
+                        </div>
+
+                        {{-- Stock mínimo --}}
+                        <div>
+                            @include('productos._field', [
+                                'name'  => 'stock_minimo',
+                                'label' => 'Stock mínimo',
+                                'type'  => 'number',
+                                'value' => old('_editing_id') == $producto->id ? old('stock_minimo') : $producto->stock_minimo,
+                                'attrs' => 'min="0" step="1"',
+                            ])
+                        </div>
+
+                        {{-- Activo --}}
+                        <div class="col-span-2 flex items-center gap-2 pt-1">
+                            @php
+                                $activoChecked = old('_editing_id') == $producto->id
+                                    ? old('activo')
+                                    : $producto->activo;
+                            @endphp
+                            <input type="checkbox" id="activo-{{ $producto->id }}" name="activo" value="1"
+                                class="rounded border-separator bg-system-background accent-system-blue"
+                                {{ $activoChecked ? 'checked' : '' }}>
+                            <label for="activo-{{ $producto->id }}" class="text-sm text-secondary-label">Producto activo</label>
+                        </div>
+                    </div>
+
+                    <div class="h-px bg-separator my-6"></div>
+
+                    <div class="flex gap-3">
+                        <button type="submit"
+                            class="bg-system-blue hover:bg-system-blue/80 text-label text-sm font-medium px-5 py-2 rounded-lg transition">
+                            Guardar cambios
+                        </button>
+                        <a href="#"
+                           class="text-secondary-label hover:text-label text-sm font-medium px-5 py-2 rounded-lg hover:bg-white/5 transition">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endforeach
 @endsection

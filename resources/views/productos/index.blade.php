@@ -75,15 +75,10 @@
                                    class="text-system-blue hover:underline text-xs font-medium">
                                     Editar
                                 </a>
-                                <form method="POST" action="{{ route('productos.destroy', $producto) }}"
-                                      onsubmit="return confirm('¿Eliminar este producto?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                        class="text-system-red hover:underline text-xs font-medium">
-                                        Eliminar
-                                    </button>
-                                </form>
+                                <a href="#modal-eliminar-{{ $producto->id }}"
+                                   class="text-system-red hover:underline text-xs font-medium">
+                                    Eliminar
+                                </a>
                             </div>
                         </td>
                     </tr>
@@ -388,6 +383,48 @@
                         <button type="submit"
                             class="bg-system-blue hover:bg-system-blue/80 text-label text-sm font-medium px-5 py-2 rounded-lg transition">
                             Guardar cambios
+                        </button>
+                        <a href="#"
+                           class="text-secondary-label hover:text-label text-sm font-medium px-5 py-2 rounded-lg hover:bg-white/5 transition">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endforeach
+
+    {{-- Modales: Confirmar eliminación (uno por producto) --}}
+    @foreach ($productos as $producto)
+        <div id="modal-eliminar-{{ $producto->id }}"
+             class="fixed inset-0 hidden items-center justify-center z-50">
+
+            {{-- Backdrop --}}
+            <a href="#" class="fixed inset-0 bg-black/60"></a>
+
+            {{-- Contenido --}}
+            <div class="relative bg-secondary-system-background rounded-2xl p-8 max-w-md w-full mx-4">
+
+                {{-- Cabecera --}}
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-label">Eliminar producto</h2>
+                    <a href="#" class="text-secondary-label hover:text-label text-2xl leading-none transition">&times;</a>
+                </div>
+
+                <div class="h-px bg-separator mb-6"></div>
+
+                <p class="text-secondary-label text-sm mb-1">
+                    ¿Estás seguro de que deseas eliminar este producto?
+                </p>
+                <p class="text-label font-medium mb-6">{{ $producto->nombre }}</p>
+
+                <form method="POST" action="{{ route('productos.destroy', $producto) }}">
+                    @csrf
+                    @method('DELETE')
+                    <div class="flex gap-3">
+                        <button type="submit"
+                            class="bg-system-red hover:bg-system-red/80 text-label text-sm font-medium px-5 py-2 rounded-lg transition">
+                            Sí, eliminar
                         </button>
                         <a href="#"
                            class="text-secondary-label hover:text-label text-sm font-medium px-5 py-2 rounded-lg hover:bg-white/5 transition">

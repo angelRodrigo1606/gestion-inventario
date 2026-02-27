@@ -31,6 +31,7 @@
 #modal-crear:target,
 #modal-crear.open,
 [id^="modal-editar"]:target,
-[id^="modal-editar"].open {
+[id^="modal-editar"].open,
+[id^="modal-eliminar"]:target {
     display: flex;
 }
